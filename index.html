@@ -1,1 +1,146 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Blomklassificering</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0"></script>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+background:#f2f2f2;
+text-align:center;
+padding:40px;
+}
+
+h1{
+color:#333;
+}
+
+#status{
+padding:10px;
+margin:20px auto;
+width:300px;
+background:white;
+border-radius:8px;
+box-shadow:0 0 5px rgba(0,0,0,0.2);
+}
+
+#preview{
+max-width:300px;
+margin-top:20px;
+}
+
+#result{
+font-size:20px;
+margin-top:20px;
+}
+
+footer{
+margin-top:50px;
+font-size:18px;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Blomklassificering med AI</h1>
+
+<div id="status">
+Status: <span id="modelStatus">Laddar modell...</span>
+</div>
+
+<input type="file" id="imageUpload" accept="image/*">
+
+<br>
+<img id="preview">
+
+<div id="result"></div>
+
+<footer>
+Skapad av Vincent Sjöberg – Klass NA23C
+</footer>
+
+<script>
+
+let model;
+
+const classes = [
+"ros",
+"tulpan",
+"maskros",
+"solros",
+"prästkrage"
+];
+
+async function loadModel(){
+
+try{
+
+document.getElementById("modelStatus").innerText = "Laddar modell...";
+
+model = await tf.loadLayersModel("tfjs_model/model.json");
+
+document.getElementById("modelStatus").innerText = "Modell laddad ✅";
+
+}catch(error){
+
+document.getElementById("modelStatus").innerText = "Fel vid laddning ❌";
+
+console.error(error);
+
+}
+
+}
+
+loadModel();
+
+document.getElementById("imageUpload").addEventListener("change", function(event){
+
+const file = event.target.files[0];
+
+const img = document.getElementById("preview");
+
+img.src = URL.createObjectURL(file);
+
+img.onload = function(){
+
+predict(img);
+
+}
+
+});
+
+async function predict(image){
+
+if(!model){
+alert("Modellen är inte laddad ännu.");
+return;
+}
+
+let tensor = tf.browser.fromPixels(image)
+.resizeNearestNeighbor([224,224])
+.toFloat()
+.div(255)
+.expandDims();
+
+let prediction = await model.predict(tensor).data();
+
+let maxIndex = prediction.indexOf(Math.max(...prediction));
+
+let probability = (prediction[maxIndex]*100).toFixed(2);
+
+document.getElementById("result").innerHTML =
+"Blomma: <b>" + classes[maxIndex] + "</b><br>Sannolikhet: " + probability + "%";
+
+}
+
+</script>
+
+</body>
+</html>
