@@ -2,68 +2,72 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Blomklassificering</title>
+<title>Blomklassificering AI</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 
 <style>
 
 body{
-font-family: Arial, sans-serif;
-background:#f2f2f2;
+font-family: Arial;
+background:#f4f6f8;
 text-align:center;
 padding:40px;
 }
 
 h1{
-color:#333;
+color:#2c3e50;
 }
 
 #status{
-padding:10px;
-margin:20px auto;
-width:300px;
 background:white;
-border-radius:8px;
-box-shadow:0 0 5px rgba(0,0,0,0.2);
+padding:15px;
+border-radius:10px;
+width:320px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 #preview{
-max-width:300px;
 margin-top:20px;
+max-width:300px;
 }
 
 #result{
-font-size:20px;
 margin-top:20px;
+font-size:22px;
 }
 
 footer{
-margin-top:50px;
-font-size:18px;
+margin-top:60px;
 font-weight:bold;
+font-size:18px;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<h1>Blomklassificering med AI</h1>
+<h1>Blomklassificering</h1>
 
 <div id="status">
-Status: <span id="modelStatus">Laddar modell...</span>
+Modellstatus: <span id="modelStatus">Startar...</span>
 </div>
+
+<br>
 
 <input type="file" id="imageUpload" accept="image/*">
 
 <br>
+
 <img id="preview">
 
 <div id="result"></div>
 
 <footer>
-Skapad av Vincent Sjöberg – Klass NA23C
+Skapad av Vincent Sjöberg – NA23C
 </footer>
 
 <script>
@@ -80,25 +84,28 @@ const classes = [
 
 async function loadModel(){
 
+const status = document.getElementById("modelStatus");
+
 try{
 
-document.getElementById("modelStatus").innerText = "Laddar modell...";
+status.innerText = "Laddar modell...";
 
-model = await tf.loadLayersModel("tfjs_model/model.json");
+model = await tf.loadGraphModel("./tfjs_model/model.json");
 
-document.getElementById("modelStatus").innerText = "Modell laddad ✅";
+status.innerText = "Modell laddad ✅";
 
 }catch(error){
 
-document.getElementById("modelStatus").innerText = "Fel vid laddning ❌";
+status.innerText = "Fel vid laddning ❌";
 
-console.error(error);
+console.error("Modellfel:", error);
 
 }
 
 }
 
 loadModel();
+
 
 document.getElementById("imageUpload").addEventListener("change", function(event){
 
@@ -115,6 +122,7 @@ predict(img);
 }
 
 });
+
 
 async function predict(image){
 
@@ -136,7 +144,7 @@ let maxIndex = prediction.indexOf(Math.max(...prediction));
 let probability = (prediction[maxIndex]*100).toFixed(2);
 
 document.getElementById("result").innerHTML =
-"Blomma: <b>" + classes[maxIndex] + "</b><br>Sannolikhet: " + probability + "%";
+"Blomma: <b>" + classes[maxIndex] + "</b><br>Sannolikhet: "+probability+"%";
 
 }
 
