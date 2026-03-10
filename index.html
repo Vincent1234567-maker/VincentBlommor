@@ -2,61 +2,43 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blomklassificering</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f7f6; }
         .status-box { padding: 15px; margin: 20px auto; width: 300px; border-radius: 8px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .success { color: green; }
-        .error { color: red; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <h1>Blomklassificering</h1>
-
     <div class="status-box">
         Modellstatus: <span id="status">Laddar... ⏳</span>
     </div>
 
-    <input type="file" id="imageUpload" accept="image/*" disabled>
-    <div id="result" style="margin-top: 20px; font-weight: bold;"></div>
+    <input type="file" id="imageUpload" accept="image/*">
+    <div id="result" style="margin-top: 20px;"></div>
 
-    <p style="margin-top: 50px;"><strong>Skapad av Vincent Sjöberg – NA23C</strong></p>
+    <p><strong>Skapad av Vincent Sjöberg – NA23C</strong></p>
 
     <script>
-        let model;
-
         async function loadModel() {
-            const statusLabel = document.getElementById('status');
-            const uploadInput = document.getElementById('imageUpload');
-
+            const status = document.getElementById('status');
             try {
-                // HÄR ÄR FIXEN: Vi lägger till mappen tjfs_model/ framför model.json
-                model = await tf.loadLayersModel('tjfs_model/model.json');
-                
-                statusLabel.innerHTML = "Klar att använda ✅";
-                statusLabel.className = "success";
-                uploadInput.disabled = false; // Aktivera knappen när modellen är laddad
-                console.log("Modellen laddades utan problem!");
-            } catch (error) {
-                statusLabel.innerHTML = "Fel vid laddning ❌";
-                statusLabel.className = "error";
-                console.error("Här är felet:", error);
+                // Denna rad letar i mappen tjfs_model efter model.json
+                const model = await tf.loadLayersModel('./tjfs_model/model.json');
+                status.textContent = "Klar att använda ✅";
+                status.className = "success";
+                console.log("Modellen laddad!");
+            } catch (e) {
+                status.textContent = "Fel vid laddning ❌";
+                status.className = "error";
+                console.error("Felmeddelande:", e);
             }
         }
-
-        // Starta laddningen direkt
         loadModel();
-
-        // Enkel funktion för att hantera bilduppladdning (exempel)
-        document.getElementById('imageUpload').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            document.getElementById('result').innerText = "Analysear bild...";
-            // Här kan du lägga till din kod för att köra model.predict()
-        });
     </script>
 </body>
 </html>
