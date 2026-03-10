@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Blomklassificering</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f7f6; }
         .status-box { padding: 15px; margin: 20px auto; width: 300px; border-radius: 8px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -15,7 +15,7 @@
 
     <h1>Blomklassificering</h1>
     <div class="status-box">
-        Modellstatus: <span id="status">Laddar... ⏳</span>
+        Modellstatus: <span id="status">Väntar på systemet... ⏳</span>
     </div>
 
     <input type="file" id="imageUpload" accept="image/*">
@@ -25,20 +25,29 @@
 
     <script>
         async function loadModel() {
-            const status = document.getElementById('status');
+            const statusLabel = document.getElementById('status');
+            
             try {
-                // Denna rad letar i mappen tjfs_model efter model.json
-                const model = await tf.loadLayersModel('./tjfs_model/model.json');
-                status.textContent = "Klar att använda ✅";
-                status.className = "success";
-                console.log("Modellen laddad!");
-            } catch (e) {
-                status.textContent = "Fel vid laddning ❌";
-                status.className = "error";
-                console.error("Felmeddelande:", e);
+                // Vi väntar 1 sekund så att webbläsaren hinner vakna
+                statusLabel.textContent = "Ansluter till modellen... 📡";
+                
+                // VIKTIGT: Sökvägen måste matcha ditt mappnamn exakt
+                const model = await tf.loadLayersModel('tjfs_model/model.json');
+                
+                statusLabel.textContent = "Klar att använda ✅";
+                statusLabel.className = "success";
+                console.log("Modellen är laddad och redo!");
+            } catch (error) {
+                statusLabel.textContent = "Fel vid laddning ❌";
+                statusLabel.className = "error";
+                console.error("DETTA ÄR FELET:", error);
             }
         }
-        loadModel();
+
+        // Kör funktionen när sidan laddats klart
+        window.onload = () => {
+            setTimeout(loadModel, 1000);
+        };
     </script>
 </body>
 </html>
